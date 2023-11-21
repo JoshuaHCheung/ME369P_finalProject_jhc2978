@@ -9,8 +9,10 @@ import time
 import numpy as np
 import re
 import json
-from tqdm import tqdm
-import pandas as pd
+import tqdm
+import pickle
+import os
+from pathlib import Path
 
 class universityScraper:
     def __init__(self):
@@ -21,6 +23,18 @@ class universityScraper:
             self.multithreading_enabled = config_data['multithreading_enabled']
             self.headless = config_data['headless']
             self.professorURL_file = config_data['professorURL_file']
+            self.data_directory = config_data['data_directory']
+            self.admin_directory = config_data['admin_directory']
+            self.finished_file = config_data['finished_file']
+            self.error_file = config_data['error_file']
+        
+        #handling the path
+        self.script_dir = os.path.dirname(__file__)
+        #making directory for administration files
+        file = Path(os.path.join(self.script_dir, self.admin_directory, 'filler.txt'))
+        file.parent.mkdir(parents=True, exist_ok=True)
+
+        self.professorURL_file = os.path.join(self.script_dir, self.admin_directory, self.professorURL_file)
 
         #creating driver
         print("loading driver")
@@ -61,7 +75,7 @@ class universityScraper:
             wait = WebDriverWait(self.driver, timeout = 3)
 
             #progress bar using tqdm
-            progressbar = tqdm(range(reloads_needed), desc="Loading…", ascii=False, ncols=75)
+            progressbar = tqdm.tqdm(range(reloads_needed), desc="Loading…", ascii=False, ncols=75)
 
             for i in progressbar:
                 #scrolling offset found manually
@@ -79,14 +93,17 @@ class universityScraper:
         for i in teacher_cards:
             self.professor_urls.append(i.get_attribute("href"))
 
+        #save to csv
+        self.saveProfessors()
+
         #testing outputs
         print(f'the number of professor urls is {len(self.professor_urls)}')
         print(f'professor urls: {self.professor_urls}') #delete later
 
-    def writeProfessorCSV(self):
-        dict = {'professor_urls':self.professor_urls}
-        df = pd.DataFrame(dict)
-        df.to_csv(self.professorURL_file)
+    def saveProfessors(self):
+        #writing to pickle file
+        with open(self.professorURL_file, 'wb') as fp:
+            pickle.dump(self.professor_urls, fp)
 
     def closeCookies(self):
         try:

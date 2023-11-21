@@ -1,5 +1,12 @@
 {
     "universityURL" : "https://www.ratemyprofessors.com/search/professors/400?q=*",
-    "multithreading_enabled" : false,
-    "headless" : true
+    "multithreading_enabled" : true,
+    "headless" : false,
+    "professorURL_file" : "professor_urls.pkl",
+    "sentimentAnalysis_enabled":true,
+    "data_directory":"data_directory",
+    "admin_directory":"admin_directory",
+    "thread_count":5,
+    "error_file": "error_file.pkl",
+    "finished_file":"finished_file.pkl"
 }
