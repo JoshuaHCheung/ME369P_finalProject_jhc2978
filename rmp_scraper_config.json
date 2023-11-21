@@ -6,7 +6,7 @@
     "sentimentAnalysis_enabled":true,
     "data_directory":"data_directory",
     "admin_directory":"admin_directory",
-    "thread_count":5,
+    "thread_count":3,
     "error_file": "error_file.pkl",
     "finished_file":"finished_file.pkl"
 }
