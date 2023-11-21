@@ -44,9 +44,18 @@ class professorScraper:
         self.finished_file = os.path.join(self.script_dir, self.admin_directory, self.finished_file)
         self.error_file = os.path.join(self.script_dir, self.admin_directory, self.error_file)
 
-        #holding finished and error files
-        self.error_file_list = []
-        self.finished_file_list = []
+        try:
+            #load old finished files
+            with open(self.finished_file, 'rb') as fp:
+                self.finished_file_list = pickle.load(fp)
+            
+            #load old error files
+            with open(self.error_file, 'rb') as fp:
+                self.error_file_list = pickle.load(fp)
+        except FileNotFoundError:
+            print('finished and read file not yet created')
+            self.finished_file_list = []
+            self.error_file_list = []
 
         #load the professor urls pickle file
         with open(self.professorURL_file, 'rb') as fp:
@@ -77,6 +86,7 @@ class professorScraper:
         #creating threads
         print(f'number of scraping threads: {self.thread_count}')
         threads = []
+        threads.append(threading.Thread(target=self.continuousPickling, args=(professorURL_lock, error_lock, finished_lock)))
         threads.append(threading.Thread(target=self.multithreadingProgress, args=(total_num_URL, professorURL_lock)))
         for i in range(self.thread_count):
             threads.append(threading.Thread(target=self.scrapeThread, args=(professorURL_lock, error_lock, finished_lock)))
@@ -111,6 +121,47 @@ class professorScraper:
                     return
                 time.sleep(1)
 
+    def continuousPickling(self, professorURL_lock, error_lock, finished_lock):
+        print('running continuous pickling')
+        old_error_file_list = []
+        old_finished_file_list = []
+        old_professor_urls = []
+        while True:
+            try:
+                #acquire professor URL lock
+                with professorURL_lock:
+                    temp_professorURL_list = self.professor_urls.copy()
+                #acquire finished files lock
+                with finished_lock:
+                    temp_finished_file_list = self.finished_file_list.copy()
+                #acquire error files lock
+                with error_lock:
+                    temp_error_file_list = self.error_file_list.copy()
+
+                #compare professor url logs
+                print(f'the length of the temp prof list is {len(temp_professorURL_list)}')
+                if len(temp_professorURL_list) != len(old_professor_urls):
+                    with open(self.professorURL_file, 'wb') as fp:
+                        pickle.dump(temp_professorURL_list, fp)
+                        old_professor_urls = temp_professorURL_list.copy()
+                        print('updated professor_dump')
+                #compare finished logs
+                if len(temp_finished_file_list) != len(old_finished_file_list):
+                    with open(self.finished_file, 'wb') as fp:
+                        pickle.dump(temp_finished_file_list, fp)
+                        old_finished_file_list = temp_finished_file_list.copy()
+                #compare error logs
+                if len(temp_error_file_list) != len(old_error_file_list):
+                    with open(self.error_file, 'wb') as fp:
+                        pickle.dump(temp_error_file_list, fp)
+                        old_error_file_list = temp_error_file_list.copy()
+
+                #exit condition
+                if len(temp_professorURL_list) == 0:
+                    return
+                time.sleep(5)
+            except Exception as error:
+                print(f'an exception occurred: {error}')
 
     def scrapeThread(self, professorURL_lock, error_lock, finished_lock):
         if self.headless:

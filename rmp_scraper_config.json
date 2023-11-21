@@ -1,7 +1,7 @@
 {
-    "universityURL" : "https://www.ratemyprofessors.com/search/professors/400?q=*",
+    "universityURL" : "https://www.ratemyprofessors.com/search/professors/1255?q=*",
     "multithreading_enabled" : true,
-    "headless" : false,
+    "headless" : true,
     "professorURL_file" : "professor_urls.pkl",
     "sentimentAnalysis_enabled":true,
     "data_directory":"data_directory",
