@@ -11,7 +11,7 @@ import pickle
 # testScraper2.getReviews()
 
 script_dir = os.path.dirname(__file__)
-file = os.path.join(script_dir, 'admin_directory', 'professor_urls.pkl')
+file = os.path.join(script_dir, 'data_directory', 'Alan_Friedman_data.pkl')
 with open(file, 'rb') as fp:
     reading_lists = pickle.load(fp)
     print(reading_lists)

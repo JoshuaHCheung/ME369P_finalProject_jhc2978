@@ -139,12 +139,10 @@ class professorScraper:
                     temp_error_file_list = self.error_file_list.copy()
 
                 #compare professor url logs
-                print(f'the length of the temp prof list is {len(temp_professorURL_list)}')
                 if len(temp_professorURL_list) != len(old_professor_urls):
                     with open(self.professorURL_file, 'wb') as fp:
                         pickle.dump(temp_professorURL_list, fp)
                         old_professor_urls = temp_professorURL_list.copy()
-                        print('updated professor_dump')
                 #compare finished logs
                 if len(temp_finished_file_list) != len(old_finished_file_list):
                     with open(self.finished_file, 'wb') as fp:
